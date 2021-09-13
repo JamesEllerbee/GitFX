@@ -2,6 +2,9 @@ package com.jamesellerbee.gitfx.Interfaces;
 
 import javafx.beans.property.StringProperty;
 
+/**
+ * Provides an interface for a class to interact with command line interface.
+ */
 public interface ICommandEngine
 {
     /**

@@ -7,14 +7,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-public class GitCommandEngine implements ICommandEngine
+/**
+ * Sends and receives output from the terminal.
+ */
+public class CommandEngine implements ICommandEngine
 {
     private static final Logger logger = LogManager.getLogger("com.jamesellerbee.gitfx");
 
@@ -23,11 +20,14 @@ public class GitCommandEngine implements ICommandEngine
     BufferedWriter processStreamWriter;
 
 
-    public GitCommandEngine()
+    /**
+     * Initializes a new instance of {@link CommandEngine}.
+     */
+    public CommandEngine()
     {
         logger.trace("Creating command engine.");
 
-        // TODO: make this platform independent
+        // FUTURE: make this platform independent
         String shell = "cmd.exe";
 
         commandOutputProperty = new SimpleStringProperty();

@@ -15,5 +15,6 @@ module com.jamesellerbee.gitfx {
     exports com.jamesellerbee.gitfx;
     exports com.jamesellerbee.gitfx.Controllers;
     exports com.jamesellerbee.gitfx.Engines;
+    exports com.jamesellerbee.gitfx.Interfaces;
 
 }

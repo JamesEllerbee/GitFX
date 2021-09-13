@@ -1,43 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<GridPane alignment="CENTER"
-          xmlns="http://javafx.com/javafx/8.0.171"
-          xmlns:fx="http://javafx.com/fxml/1"
-          fx:controller="com.jamesellerbee.gitfx.Controllers.GitFxController">
-   <padding>
-      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-   </padding>
 
-   <columnConstraints>
-      <ColumnConstraints />
-   </columnConstraints>
-   <rowConstraints>
-      <RowConstraints minHeight="10.0" prefHeight="30.0" />
-      <RowConstraints />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" />
-      <RowConstraints />
-   </rowConstraints>
+<VBox xmlns="http://javafx.com/javafx/11.0.2"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.jamesellerbee.gitfx.Controllers.GitFxController">
 
-   <Label GridPane.rowIndex="0"
-           text="Input" />
+    <MenuBar>
+        <Menu text="File">
+            <MenuItem text="Open existing repository" onAction="#onAction_OpenRepository"/>
+        </Menu>
+        <Menu text="Git">
+            <MenuItem text="Clone"/>
+        </Menu>
+        <Menu text="Application">
+            <MenuItem text="Debug command output" onAction="#onAction_DebugCommandOutput"/>
+        </Menu>
+    </MenuBar>
 
-   <TextField GridPane.rowIndex="1"
-            fx:id="commandInput"
-            onKeyPressed="#onKeyPress_InCommandInput"/>
+    <GridPane alignment="CENTER">
+        <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+        </padding>
 
-   <Label GridPane.rowIndex="2"
-          text="Output"  />
+        <Button GridPane.rowIndex="0"
+                GridPane.columnIndex="0"
+                fx:id="openRepositoryButton"
+                text="Open repository"
+                styleClass="btn-primary"
+                onAction="#onAction_OpenRepository">
+            <tooltip>
+                <Tooltip text="Open an existing repository"/>
+            </tooltip>
+        </Button>
 
-   <TextArea GridPane.rowIndex="3"
-             fx:id="commandOutput"
-             editable="false" />
-
-</GridPane>
+    </GridPane>
+</VBox>

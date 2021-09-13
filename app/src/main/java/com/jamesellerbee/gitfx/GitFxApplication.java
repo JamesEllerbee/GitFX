@@ -5,6 +5,7 @@ import com.jamesellerbee.gitfx.Controllers.GitFxController;
 import com.jamesellerbee.gitfx.Interfaces.ICommandEngine;
 import com.jamesellerbee.gitfx.Module.GitFxModule;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
@@ -25,17 +26,18 @@ public class GitFxApplication extends javafx.application.Application
     {
         logger.info("Application start.");
         FXMLLoader fxmlLoader = new FXMLLoader(GitFxApplication.class.getResource("/applicationView.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 600, 600);
+        Parent root = fxmlLoader.load();
+
+        // FUTURE: remember screen size on stop and load
+        Scene scene = new Scene(root, 500, 500);
+
         GitFxController gitFxController = fxmlLoader.getController();
+        gitFxController.setGitFxStage(stage);
         injector.injectMembers(gitFxController);
 
         // add bootstrap stylesheet
         logger.trace("Adding bootstrap fx stylesheet.");
         scene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
-
-        // add style to controls
-        logger.trace("Adding styling to controls.");
-        gitFxController.addStyle();
 
         logger.trace("Finalizing stage.");
         stage.setTitle("GitFx");

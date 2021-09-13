@@ -2,7 +2,7 @@ package com.jamesellerbee.gitfx.Module;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
-import com.jamesellerbee.gitfx.Engines.GitCommandEngine;
+import com.jamesellerbee.gitfx.Engines.CommandEngine;
 import com.jamesellerbee.gitfx.Interfaces.ICommandEngine;
 
 /**
@@ -15,7 +15,7 @@ public class GitFxModule extends AbstractModule
     {
         super.configure();
         bind(ICommandEngine.class)
-                .to(GitCommandEngine.class)
+                .to(CommandEngine.class)
                 .in(Scopes.SINGLETON);
     }
 }

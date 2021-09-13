@@ -1,63 +1,60 @@
 package com.jamesellerbee.gitfx.Controllers;
 
 import com.google.inject.Inject;
-import com.jamesellerbee.gitfx.Engines.GitCommandEngine;
+import com.google.inject.Injector;
+import com.jamesellerbee.gitfx.GitFxApplication;
 import com.jamesellerbee.gitfx.Interfaces.ICommandEngine;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.kordamp.bootstrapfx.BootstrapFX;
+
+import java.io.File;
 
 public class GitFxController
 {
     private static final Logger logger = LogManager.getLogger("com.jamesellerbee.gitfx");
+    private static final String INVALID_GIT_REPOSITORY = "Selected directory not a valid git repository. (git directory does not exist in selected location)";
+    private static final String FILE_SEP = System.getProperty("file.separator");
 
-    private boolean isListeningToCommandEngine;
+    // region Private Fields
 
     @Inject
     private ICommandEngine gitCommandEngine;
 
+    private Stage gitFxStage;
+
+    // endregion
+
+    // region FXML Fields
+
     @FXML
-    private TextField commandInput;
-    @FXML
-    private TextArea commandOutput;
+    private Button openRepositoryButton;
+
+    // endregion
 
     public GitFxController()
     {
-        isListeningToCommandEngine = false;
     }
 
-    public void addStyle()
+    // Accessors and mutators
+
+    public void setGitFxStage(Stage gitFxStage)
     {
-        // hellButton style
-//        helloButton.getStyleClass().addAll("btn", "btn-primary");
-
-        // welcomeLabel style
-//        welcomeLabel.getStyleClass().addAll("strong");
-
-        // etc...
+        this.gitFxStage = gitFxStage;
     }
 
-    public void onKeyPress_InCommandInput(KeyEvent keyEvent)
-    {
-        startListeningToCommandEngine();
-
-        if(keyEvent.getCode().equals(KeyCode.ENTER))
-        {
-            logger.debug("enter key press detected on control commandinput");
-            gitCommandEngine.send(commandInput.getText());
-
-            // clear command input text
-            commandInput.setText("");
-        }
-    }
+    // endregion
 
     @FXML
     public void exitApplication(ActionEvent event)
@@ -66,27 +63,97 @@ public class GitFxController
         Platform.exit();
     }
 
-    private void startListeningToCommandEngine()
+
+    public void onAction_DebugCommandOutput(ActionEvent actionEvent)
     {
-        if(!isListeningToCommandEngine)
+        logger.trace("debug command output clicked");
+
+        // create new window
+        try
         {
-            gitCommandEngine.getCommandOutputProperty().addListener(
-                    (observable, oldValue, newValue) ->
-                    {
-                        try
-                        {
-                            logger.debug("command output property changed: {} -> {}", oldValue, newValue);
-                            commandOutput.appendText(newValue + "\n");
-                        }
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/debugCommandOutputView.fxml"));
+            Parent root = fxmlLoader.load();
 
-                        // catch errors so the observer doesn't collapse
-                        catch (Exception e)
-                        {
-                            logger.error(e);
-                        }
-                    });
+            DebugCommandOutputController debugCommandOutputController = fxmlLoader.getController();
+            GitFxApplication.injector.injectMembers(debugCommandOutputController);
+            debugCommandOutputController.startListeningForCommandOutput();
 
-            isListeningToCommandEngine = true;
+            Scene scene = new Scene(root, 500, 500);
+            scene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
+
+            Stage stage = new Stage();
+            stage.setTitle("GitFx command output (debug)");
+            stage.setScene(scene);
+            stage.show();
+
+            stage.setOnHiding((value) -> debugCommandOutputController.stopListeningForCommandOutput());
         }
+        catch (Exception e)
+        {
+            logger.error("There was an error creating the debug command output window.");
+            logger.debug(e);
+        }
+    }
+
+    public void onAction_OpenRepository(ActionEvent actionEvent)
+    {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Open Repository");
+        File selectedDirectory = directoryChooser.showDialog(gitFxStage);
+        if (selectedDirectory != null)
+        {
+            if (isValidGitRepository(selectedDirectory))
+            {
+                gitCommandEngine.send(String.format("cd %s", selectedDirectory.getAbsolutePath()));
+                logger.info("switched pwd to {}", selectedDirectory.getAbsolutePath());
+                openRepositoryView();
+            }
+            else
+            {
+                logger.error(INVALID_GIT_REPOSITORY);
+                Alert repositoryError = new Alert(
+                        Alert.AlertType.ERROR, INVALID_GIT_REPOSITORY, ButtonType.OK);
+                repositoryError.show();
+            }
+        }
+
+
+    }
+
+    private void openRepositoryView()
+    {
+        try
+        {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/repositoryView.fxml"));
+            Parent root = fxmlLoader.load();
+
+            RepositoryController repositoryController = fxmlLoader.getController();
+            GitFxApplication.injector.injectMembers(repositoryController);
+            repositoryController.startListeningToCommandOutput();
+
+            Scene repositoryScene = new Scene(root, 500, 500);
+            repositoryScene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
+
+            Stage repositoryStage = new Stage();
+            repositoryStage.setTitle("GitFx: Repository view");
+            repositoryStage.setScene(repositoryScene);
+            repositoryStage.show();
+            repositoryStage.setOnHiding((value) -> gitFxStage.show());
+
+            gitFxStage.hide();
+        }
+        catch (Exception e)
+        {
+            logger.error("There was an error opening the repository view.");
+            logger.debug(e);
+        }
+    }
+
+    private boolean isValidGitRepository(File selectedDirectory)
+    {
+        String path = selectedDirectory.getAbsolutePath() + FILE_SEP + ".git";
+        logger.debug("Checking for .git directory in {}", path);
+        File gitDirectory = new File(path);
+        return gitDirectory.exists();
     }
 }

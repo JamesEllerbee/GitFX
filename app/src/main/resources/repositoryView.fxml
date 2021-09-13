@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jamesellerbee.gitfx.Controllers.RepositoryController">
+
+    <MenuBar>
+        <Menu text="File">
+            <MenuItem text="Close repository" />
+            <MenuItem onAction="#onAction_Quit" text="Quit" />
+        </Menu>
+
+        <Menu text="Local">
+            <MenuItem onAction="#onAction_Status" text="Status" />
+
+            <MenuItem onAction="#onAction_Commit" text="Commit" />
+        </Menu>
+
+        <Menu text="Remote">
+            <MenuItem text="Fetch" />
+            <MenuItem text="Pull" />
+            <MenuItem text="Push" />
+        </Menu>
+
+        <Menu text="Application">
+
+        </Menu>
+    </MenuBar>
+
+    <GridPane alignment="CENTER">
+
+        <columnConstraints>
+            <ColumnConstraints maxWidth="60.0" minWidth="60.0" prefWidth="60.0" />
+            <ColumnConstraints />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+        </rowConstraints>
+
+        <VBox alignment="TOP_CENTER" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.rowSpan="2147483647">
+
+            <GridPane.margin>
+                <Insets />
+            </GridPane.margin>
+
+            <!-- add basic git command buttons here-->
+            <Button alignment="CENTER" onAction="#onAction_Status" text="Refresh">
+                <tooltip>
+                    <Tooltip text="Perform a git status to update changes" />
+                </tooltip>
+            </Button>
+
+        </VBox>
+
+        <Label text="Unstaged Changes" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+        <TextArea fx:id="unstagedChangesTextArea" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+        <Label text="Staged changes" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+        <TextArea fx:id="stagedChangesTextArea" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+    </GridPane>
+
+</VBox>
