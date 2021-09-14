@@ -14,47 +14,75 @@
 
         <Menu text="Local">
             <MenuItem onAction="#onAction_Status" text="Status" />
-
             <MenuItem onAction="#onAction_Commit" text="Commit" />
         </Menu>
 
         <Menu text="Remote">
-            <MenuItem text="Fetch" />
+            <MenuItem onAction="#onAction_Fetch" text="Fetch all" />
             <MenuItem text="Pull" />
-            <MenuItem text="Push" />
+            <MenuItem onAction="#onAction_Push" text="Push" />
         </Menu>
 
         <Menu text="Application">
-
+            <MenuItem onAction="#onAction_DebugCommandOutput" text="Debug command output" />
         </Menu>
     </MenuBar>
 
     <GridPane alignment="CENTER">
 
         <columnConstraints>
-            <ColumnConstraints maxWidth="60.0" minWidth="60.0" prefWidth="60.0" />
-            <ColumnConstraints />
+            <ColumnConstraints maxWidth="112.0" minWidth="112.0" prefWidth="112.0" />
+            <ColumnConstraints maxWidth="472.0" minWidth="427.0" prefWidth="427.0" />
         </columnConstraints>
         <rowConstraints>
             <RowConstraints />
             <RowConstraints />
-            <RowConstraints />
+            <RowConstraints minHeight="30" />
             <RowConstraints />
         </rowConstraints>
 
-        <VBox alignment="TOP_CENTER" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.rowSpan="2147483647">
-
-            <GridPane.margin>
-                <Insets />
-            </GridPane.margin>
-
+        <VBox GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.rowSpan="2147483647">
             <!-- add basic git command buttons here-->
-            <Button alignment="CENTER" onAction="#onAction_Status" text="Refresh">
+            <Button onAction="#onAction_Status" styleClass="btn-primary" text="Refresh">
                 <tooltip>
                     <Tooltip text="Perform a git status to update changes" />
                 </tooltip>
+
+                <VBox.margin>
+                    <Insets bottom="10.0" />
+                </VBox.margin>
+
             </Button>
 
+            <Button onAction="#onAction_Stage" styleClass="btn-primary" text="Stage changes">
+
+                <tooltip>
+                    <Tooltip text="Stage unstaged changes WARNING: Currently, this will add all changes." />
+                </tooltip>
+
+                <VBox.margin>
+                    <Insets bottom="10.0" />
+                </VBox.margin>
+            </Button>
+
+            <Button onAction="#onAction_Commit" styleClass="btn-primary" text="Commit">
+                <tooltip>
+                    <Tooltip text="Open commit message dialog and create a commit for the staged changes" />
+                </tooltip>
+
+                <VBox.margin>
+                    <Insets bottom="10.0" />
+                </VBox.margin>
+
+            </Button>
+
+
+
+            <Button onAction="#onAction_Push" styleClass="btn-primary" text="Push">
+                <tooltip>
+                    <Tooltip text="Push committed changes to remote WARNING: this will push everything, not just committed changes on this local branch." />
+                </tooltip>
+            </Button>
         </VBox>
 
         <Label text="Unstaged Changes" GridPane.columnIndex="1" GridPane.rowIndex="0" />
@@ -63,7 +91,14 @@
 
         <Label text="Staged changes" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-        <TextArea fx:id="stagedChangesTextArea" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        <TextArea fx:id="stagedChangesTextArea" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+        <VBox.margin>
+            <Insets top="10.0" />
+        </VBox.margin>
+        <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" />
+        </padding>
 
     </GridPane>
 

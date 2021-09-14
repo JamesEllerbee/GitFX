@@ -1,9 +1,10 @@
 package com.jamesellerbee.gitfx.Controllers;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.jamesellerbee.gitfx.GitFxApplication;
+import com.jamesellerbee.gitfx.Interfaces.IAppPropertyProvider;
 import com.jamesellerbee.gitfx.Interfaces.ICommandEngine;
+import com.jamesellerbee.gitfx.Utilities.PropertyConstants;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
@@ -32,6 +34,9 @@ public class GitFxController
     @Inject
     private ICommandEngine gitCommandEngine;
 
+    @Inject
+    private IAppPropertyProvider appPropertyProvider;
+
     private Stage gitFxStage;
 
     // endregion
@@ -40,6 +45,10 @@ public class GitFxController
 
     @FXML
     private Button openRepositoryButton;
+    @FXML
+    private Button openRecentRepositoryButton;
+    @FXML
+    private Label openRecentRepositoryLabel;
 
     // endregion
 
@@ -47,11 +56,25 @@ public class GitFxController
     {
     }
 
-    // Accessors and mutators
+    // region Accessors and Mutators
 
     public void setGitFxStage(Stage gitFxStage)
     {
         this.gitFxStage = gitFxStage;
+    }
+
+    public void setOpenRecentRepositoryButtonText(String recentRepository)
+    {
+        if (!recentRepository.isEmpty())
+        {
+            openRecentRepositoryButton.setText(recentRepository);
+        }
+        else
+        {
+            openRecentRepositoryLabel.setVisible(false);
+            openRecentRepositoryButton.setVisible(false);
+            openRecentRepositoryButton.setDisable(true);
+        }
     }
 
     // endregion
@@ -62,7 +85,6 @@ public class GitFxController
         logger.trace("In exit application.");
         Platform.exit();
     }
-
 
     public void onAction_DebugCommandOutput(ActionEvent actionEvent)
     {
@@ -75,7 +97,7 @@ public class GitFxController
             Parent root = fxmlLoader.load();
 
             DebugCommandOutputController debugCommandOutputController = fxmlLoader.getController();
-            GitFxApplication.injector.injectMembers(debugCommandOutputController);
+            GitFxApplication.getInjector().injectMembers(debugCommandOutputController);
             debugCommandOutputController.startListeningForCommandOutput();
 
             Scene scene = new Scene(root, 500, 500);
@@ -104,9 +126,10 @@ public class GitFxController
         {
             if (isValidGitRepository(selectedDirectory))
             {
+                appPropertyProvider.store(PropertyConstants.RECENT_REPOSITORY_KEY, selectedDirectory.getAbsolutePath());
                 gitCommandEngine.send(String.format("cd %s", selectedDirectory.getAbsolutePath()));
                 logger.info("switched pwd to {}", selectedDirectory.getAbsolutePath());
-                openRepositoryView();
+                openRepositoryView(true);
             }
             else
             {
@@ -116,11 +139,17 @@ public class GitFxController
                 repositoryError.show();
             }
         }
-
-
     }
 
-    private void openRepositoryView()
+    public void onAction_OpenRecent(ActionEvent actionEvent)
+    {
+        File selectedDirectory = new File(openRecentRepositoryButton.getText());
+        gitCommandEngine.send(String.format("cd %s", selectedDirectory.getAbsolutePath()));
+        logger.info("switched pwd to {}", selectedDirectory.getAbsolutePath());
+        openRepositoryView(false);
+    }
+
+    private void openRepositoryView(boolean updateStoredProperty)
     {
         try
         {
@@ -128,17 +157,27 @@ public class GitFxController
             Parent root = fxmlLoader.load();
 
             RepositoryController repositoryController = fxmlLoader.getController();
-            GitFxApplication.injector.injectMembers(repositoryController);
+            GitFxApplication.getInjector().injectMembers(repositoryController);
             repositoryController.startListeningToCommandOutput();
+            repositoryController.updateInfoTextAreas();
 
-            Scene repositoryScene = new Scene(root, 500, 500);
+            Scene repositoryScene = new Scene(root, 600, 500);
             repositoryScene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
 
             Stage repositoryStage = new Stage();
             repositoryStage.setTitle("GitFx: Repository view");
             repositoryStage.setScene(repositoryScene);
             repositoryStage.show();
-            repositoryStage.setOnHiding((value) -> gitFxStage.show());
+            repositoryStage.setOnHiding((value) ->
+                                        {
+                                            if (updateStoredProperty)
+                                            {
+                                                setOpenRecentRepositoryButtonText(
+                                                        appPropertyProvider.get(PropertyConstants.RECENT_REPOSITORY_KEY, ""));
+                                            }
+
+                                            gitFxStage.show();
+                                        });
 
             gitFxStage.hide();
         }
