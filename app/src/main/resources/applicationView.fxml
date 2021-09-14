@@ -4,38 +4,48 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
-<VBox xmlns="http://javafx.com/javafx/11.0.2"
-      xmlns:fx="http://javafx.com/fxml/1"
+<VBox xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.jamesellerbee.gitfx.Controllers.GitFxController">
 
     <MenuBar>
         <Menu text="File">
-            <MenuItem text="Open existing repository" onAction="#onAction_OpenRepository"/>
+            <MenuItem onAction="#onAction_OpenRepository" text="Open existing repository"/>
         </Menu>
         <Menu text="Git">
             <MenuItem text="Clone"/>
         </Menu>
         <Menu text="Application">
-            <MenuItem text="Debug command output" onAction="#onAction_DebugCommandOutput"/>
+            <MenuItem onAction="#onAction_DebugCommandOutput" text="Debug command output"/>
         </Menu>
     </MenuBar>
 
     <GridPane alignment="CENTER">
-        <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-        </padding>
 
-        <Button GridPane.rowIndex="0"
-                GridPane.columnIndex="0"
-                fx:id="openRepositoryButton"
-                text="Open repository"
-                styleClass="btn-primary"
-                onAction="#onAction_OpenRepository">
+        <columnConstraints>
+            <ColumnConstraints/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="30" prefHeight="30"/>
+            <RowConstraints minHeight="30" prefHeight="30"/>
+            <RowConstraints minHeight="30" prefHeight="30"/>
+        </rowConstraints>
+
+        <Button fx:id="openRepositoryButton" onAction="#onAction_OpenRepository" styleClass="btn-primary"
+                text="Open repository" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0">
             <tooltip>
                 <Tooltip text="Open an existing repository"/>
             </tooltip>
         </Button>
+
+        <Label fx:id="openRecentRepositoryLabel" text="Open recent" GridPane.columnIndex="0"
+               GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
+
+        <Button fx:id="openRecentRepositoryButton" onAction="#onAction_OpenRecent" styleClass="btn-primary"
+                text="Recent repository" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2"/>
+
+        <VBox.margin>
+            <Insets top="10.0"/>
+        </VBox.margin>
 
     </GridPane>
 </VBox>
