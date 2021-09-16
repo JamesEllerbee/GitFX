@@ -32,6 +32,8 @@ public class RepositoryController
     private static final String STAGED_HINT_RESTORE_STAGED = "(use \"git restore --staged <file>...\" to unstage)";
     private static final String NOT_STAGED_HINT_ADD = "(use \"git add <file>...\" to update what will be committed)";
     private static final String NOT_STAGED_HINT_RESTORE = "(use \"git restore <file>...\" to discard changes in working directory)";
+    private static final String BRANCH_AHEAD = "Your branch is ahead of";
+
 
     private Stage repositoryStage;
     private final ChangeListener<String> commandOutputChangeListener = this::statusOutputChangeListener;
@@ -66,7 +68,8 @@ public class RepositoryController
         ChangeListener<String> currentBranchChangeListener = ((observable, oldValue, newValue) ->
         {
             if(!newValue.contains("git rev-parse --abbrev-ref HEAD") &&
-               !newValue.contains("git checkout"))
+               !newValue.contains("git checkout") &&
+               !newValue.contains(BRANCH_AHEAD))
             {
                 stringBuilder.append(newValue);
             }
