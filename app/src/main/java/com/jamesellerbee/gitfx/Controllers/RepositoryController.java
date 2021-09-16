@@ -67,11 +67,20 @@ public class RepositoryController
         StringBuilder stringBuilder = new StringBuilder();
         ChangeListener<String> currentBranchChangeListener = ((observable, oldValue, newValue) ->
         {
-            if(!newValue.contains("git rev-parse --abbrev-ref HEAD") &&
-               !newValue.contains("git checkout") &&
-               !newValue.contains(BRANCH_AHEAD))
+            try
             {
-                stringBuilder.append(newValue);
+                if(!newValue.contains("git rev-parse --abbrev-ref HEAD") &&
+                   !newValue.contains("git checkout") &&
+                   !newValue.contains(BRANCH_AHEAD))
+                {
+                    stringBuilder.append(newValue);
+                }
+            }
+            catch (Exception e)
+            {
+                // catch errors so that this listener doesn't collapse
+                logger.error("Error occurred while getting current branch information");
+                logger.debug(e);
             }
         });
 
