@@ -43,24 +43,31 @@
         <rowConstraints>
             <RowConstraints/>
             <RowConstraints/>
-            <RowConstraints minHeight="30"/>
+            <RowConstraints/>
+            <RowConstraints/>
+            <RowConstraints/>
             <RowConstraints/>
         </rowConstraints>
 
-        <VBox GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.rowSpan="2147483647">
+        <VBox GridPane.columnIndex="0"
+              GridPane.rowIndex="5"
+              GridPane.halignment="CENTER"
+              GridPane.valignment="CENTER"
+              GridPane.rowSpan="2147483647">
+
             <!-- basic git command buttons -->
-            <Button onAction="#onAction_Status" styleClass="btn-primary" text="Refresh">
+            <Button onAction="#onAction_Status" styleClass="btn-primary" text="Refresh" minWidth="99">
                 <tooltip>
                     <Tooltip text="Perform a git status to update changes"/>
                 </tooltip>
 
                 <VBox.margin>
-                    <Insets bottom="10.0"/>
+                    <Insets top="5.0" bottom="10.0"/>
                 </VBox.margin>
 
             </Button>
 
-            <Button onAction="#onAction_Stage" styleClass="btn-primary" text="Stage changes">
+            <Button onAction="#onAction_Stage" styleClass="btn-primary" text="Stage changes" minWidth="99">
                 <tooltip>
                     <Tooltip text="Stage unstaged changes WARNING: Currently, this will add all changes."/>
                 </tooltip>
@@ -70,7 +77,7 @@
                 </VBox.margin>
             </Button>
 
-            <Button onAction="#onAction_Commit" styleClass="btn-primary" text="Commit">
+            <Button onAction="#onAction_Commit" styleClass="btn-primary" text="Commit" minWidth="99">
                 <tooltip>
                     <Tooltip text="Open commit message dialog and create a commit for the staged changes"/>
                 </tooltip>
@@ -82,7 +89,7 @@
             </Button>
 
 
-            <Button onAction="#onAction_Push" styleClass="btn-primary" text="Push">
+            <Button onAction="#onAction_Push" styleClass="btn-primary" text="Push" minWidth="99">
                 <tooltip>
                     <Tooltip
                             text="Push committed changes to remote WARNING: this will push everything, not just committed changes on this local branch."/>
@@ -90,13 +97,34 @@
             </Button>
         </VBox>
 
-        <Label text="Unstaged Changes" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+        <Label GridPane.columnIndex="1"
+               GridPane.rowIndex="0"
+               GridPane.halignment="CENTER"
+               text="Current branch"
+               styleClass="b"
+        />
 
-        <TextArea fx:id="unstagedChangesTextArea" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+        <Label GridPane.columnIndex="1"
+               GridPane.rowIndex="1"
+               GridPane.halignment="CENTER"
+               fx:id="currentBranch" text="current branch info"
+               styleClass="text-primary"/>
 
-        <Label text="Staged changes" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+        <Label GridPane.columnIndex="1" GridPane.rowIndex="2" text="Unstaged Changes">
+            <GridPane.margin>
+                <Insets top="5" />
+            </GridPane.margin>
+        </Label>
 
-        <TextArea fx:id="stagedChangesTextArea" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+        <TextArea GridPane.columnIndex="1" GridPane.rowIndex="3" fx:id="unstagedChangesTextArea" editable="false"/>
+
+        <Label GridPane.columnIndex="1" GridPane.rowIndex="4" text="Staged changes">
+            <GridPane.margin>
+                <Insets top="5" />
+            </GridPane.margin>
+        </Label>
+
+        <TextArea GridPane.columnIndex="1" GridPane.rowIndex="5" fx:id="stagedChangesTextArea" editable="false"/>
 
         <VBox.margin>
             <Insets top="10.0"/>

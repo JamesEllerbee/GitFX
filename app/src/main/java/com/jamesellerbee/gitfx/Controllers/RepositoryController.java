@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.Stage;
@@ -48,12 +49,34 @@ public class RepositoryController
     private TextArea unstagedChangesTextArea;
     @FXML
     private TextArea stagedChangesTextArea;
+    @FXML
+    private Label currentBranch;
+
 
     // endregion
 
     public void setStage(Stage stage)
     {
         repositoryStage = stage;
+    }
+
+    public void setCurrentBranchInfo()
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+        ChangeListener<String> currentBranchChangeListener = ((observable, oldValue, newValue) ->
+        {
+            if(!newValue.contains("git rev-parse --abbrev-ref HEAD"))
+            {
+                stringBuilder.append(newValue);
+            }
+        });
+
+        commandEngine.getCommandOutputProperty().addListener(currentBranchChangeListener);
+        commandEngine.send("git rev-parse --abbrev-ref HEAD");
+        thenWait(100);
+        currentBranch.setText(stringBuilder.toString());
+        commandEngine.getCommandOutputProperty().removeListener(currentBranchChangeListener);
+        updateInfoTextAreas();
     }
 
     public void startListeningToCommandOutput()
@@ -160,13 +183,15 @@ public class RepositoryController
     public void onAction_NewBranch(ActionEvent actionEvent)
     {
         TextInputDialog branchMessageDialog = new TextInputDialog("Enter new branch name.");
+        branchMessageDialog.setTitle("Checkout to new branch");
         branchMessageDialog.setHeaderText("Enter new branch name");
 
         Optional<String> resultOptional = branchMessageDialog.showAndWait();
         if (resultOptional.isPresent())
         {
+            // todo: check that the user doesn't have any uncommitted changes before checking out, warn and ask if they want to continue
             commandEngine.send(String.format("git checkout -b %s", resultOptional.get()));
-            updateInfoTextAreas();
+            setCurrentBranchInfo();
         }
         else
         {
@@ -178,6 +203,7 @@ public class RepositoryController
     {
         // todo: open a window that shows all the branches and checkout to the branch the user selects
         TextInputDialog branchMessageDialog = new TextInputDialog("Enter branch name.");
+        branchMessageDialog.setTitle("Checkout to existing branch");
 
         StringBuilder stringBuilder = new StringBuilder();
         ChangeListener<String> branchOutputChangeListener = ((observable, oldValue, newValue) ->
@@ -202,7 +228,9 @@ public class RepositoryController
         commandEngine.getCommandOutputProperty().removeListener(branchOutputChangeListener);
         if (resultOptional.isPresent())
         {
+            // todo: check that the user doesn't have any uncommitted changes before checking out, warn and ask if they want to continue
             commandEngine.send(String.format("git checkout %s", resultOptional.get()));
+            setCurrentBranchInfo();
         }
         else
         {

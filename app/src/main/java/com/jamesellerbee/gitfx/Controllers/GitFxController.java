@@ -159,7 +159,6 @@ public class GitFxController
             RepositoryController repositoryController = fxmlLoader.getController();
             GitFxApplication.getInjector().injectMembers(repositoryController);
             repositoryController.startListeningToCommandOutput();
-            repositoryController.updateInfoTextAreas();
 
             Scene repositoryScene = new Scene(root, 600, 500);
             repositoryScene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
@@ -167,7 +166,9 @@ public class GitFxController
             Stage repositoryStage = new Stage();
             repositoryStage.setTitle("GitFx: Repository view");
             repositoryStage.setScene(repositoryScene);
+            repositoryController.setCurrentBranchInfo();
             repositoryStage.show();
+
             repositoryStage.setOnHiding((value) ->
                                         {
                                             if (updateStoredProperty)
@@ -180,6 +181,7 @@ public class GitFxController
                                         });
 
             repositoryController.setStage(repositoryStage);
+
 
             gitFxStage.hide();
         }
