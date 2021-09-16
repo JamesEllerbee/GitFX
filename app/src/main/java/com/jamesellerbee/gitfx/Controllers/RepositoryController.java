@@ -65,7 +65,8 @@ public class RepositoryController
         StringBuilder stringBuilder = new StringBuilder();
         ChangeListener<String> currentBranchChangeListener = ((observable, oldValue, newValue) ->
         {
-            if(!newValue.contains("git rev-parse --abbrev-ref HEAD"))
+            if(!newValue.contains("git rev-parse --abbrev-ref HEAD") &&
+               !newValue.contains("git checkout"))
             {
                 stringBuilder.append(newValue);
             }
