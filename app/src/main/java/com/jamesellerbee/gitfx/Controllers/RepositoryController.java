@@ -33,6 +33,7 @@ public class RepositoryController
     private static final String NOT_STAGED_HINT_ADD = "(use \"git add <file>...\" to update what will be committed)";
     private static final String NOT_STAGED_HINT_RESTORE = "(use \"git restore <file>...\" to discard changes in working directory)";
     private static final String BRANCH_AHEAD = "Your branch is ahead of";
+    private static final String GIT_PUSH_HINT = "\"git push\"";
 
 
     private Stage repositoryStage;
@@ -71,7 +72,8 @@ public class RepositoryController
             {
                 if(!newValue.contains("git rev-parse --abbrev-ref HEAD") &&
                    !newValue.contains("git checkout") &&
-                   !newValue.contains(BRANCH_AHEAD))
+                   !newValue.contains(BRANCH_AHEAD) &&
+                   !newValue.contains(GIT_PUSH_HINT))
                 {
                     stringBuilder.append(newValue);
                 }
