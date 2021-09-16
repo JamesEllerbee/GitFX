@@ -32,7 +32,9 @@ public class RepositoryController
     private static final String NOT_STAGED_HINT_ADD = "(use \"git add <file>...\" to update what will be committed)";
     private static final String NOT_STAGED_HINT_RESTORE = "(use \"git restore <file>...\" to discard changes in working directory)";
 
-    private final ChangeListener<String> commandOutputChangeListener = this::commandOutputChangeListener;
+    private Stage repositoryStage;
+    private final ChangeListener<String> commandOutputChangeListener = this::statusOutputChangeListener;
+
 
     private boolean appendToUnStagedChangesTextArea = false;
     private boolean appendToStagedChangesTextArea = false;
@@ -48,6 +50,11 @@ public class RepositoryController
     private TextArea stagedChangesTextArea;
 
     // endregion
+
+    public void setStage(Stage stage)
+    {
+        repositoryStage = stage;
+    }
 
     public void startListeningToCommandOutput()
     {
@@ -71,8 +78,8 @@ public class RepositoryController
     public void onAction_Commit(ActionEvent actionEvent)
     {
         // FUTURE: check application properties if user wants to open their text editor
-        TextInputDialog commitMessageDialog = new TextInputDialog("Enter commit message");
-        commitMessageDialog.setHeaderText("Enter commit message.");
+        TextInputDialog commitMessageDialog = new TextInputDialog("Enter commit message.");
+        commitMessageDialog.setHeaderText("Enter commit message");
 
         Optional<String> resultOptional = commitMessageDialog.showAndWait();
         logger.debug("commit message dialog result: {}", resultOptional);
@@ -97,12 +104,14 @@ public class RepositoryController
     public void onAction_Fetch(ActionEvent actionEvent)
     {
         commandEngine.send("git fetch --all -a");
+        updateInfoTextAreas();
     }
 
     public void onAction_Push(ActionEvent actionEvent)
     {
         //todo make this safer by resolving current root and adding origin
         commandEngine.send("git push");
+        updateInfoTextAreas();
     }
 
     public void onAction_DebugCommandOutput(ActionEvent actionEvent)
@@ -143,7 +152,67 @@ public class RepositoryController
         updateInfoTextAreas();
     }
 
-    private void commandOutputChangeListener(ObservableValue<? extends String> observable, String oldValue, String newValue)
+    public void onAction_Close(ActionEvent actionEvent)
+    {
+        repositoryStage.close();
+    }
+
+    public void onAction_NewBranch(ActionEvent actionEvent)
+    {
+        TextInputDialog branchMessageDialog = new TextInputDialog("Enter new branch name.");
+        branchMessageDialog.setHeaderText("Enter new branch name");
+
+        Optional<String> resultOptional = branchMessageDialog.showAndWait();
+        if (resultOptional.isPresent())
+        {
+            commandEngine.send(String.format("git checkout -b %s", resultOptional.get()));
+            updateInfoTextAreas();
+        }
+        else
+        {
+            logger.debug("Branch message dialog returned no result.");
+        }
+    }
+
+    public void onAction_ExistingBranch(ActionEvent actionEvent)
+    {
+        // todo: open a window that shows all the branches and checkout to the branch the user selects
+        TextInputDialog branchMessageDialog = new TextInputDialog("Enter branch name.");
+
+        StringBuilder stringBuilder = new StringBuilder();
+        ChangeListener<String> branchOutputChangeListener = ((observable, oldValue, newValue) ->
+        {
+            if (!newValue.contains("git branch -a"))
+            {
+                stringBuilder.append(newValue);
+                stringBuilder.append("\n");
+                logger.trace("new value: {}, string builder value {}", newValue, stringBuilder.toString());
+            }
+        });
+
+        commandEngine.getCommandOutputProperty().addListener(branchOutputChangeListener);
+        commandEngine.send("git branch -a");
+
+        thenWait(100);
+
+        branchMessageDialog.setHeaderText(stringBuilder.toString());
+
+
+        Optional<String> resultOptional = branchMessageDialog.showAndWait();
+        commandEngine.getCommandOutputProperty().removeListener(branchOutputChangeListener);
+        if (resultOptional.isPresent())
+        {
+            commandEngine.send(String.format("git checkout %s", resultOptional.get()));
+        }
+        else
+        {
+            logger.debug("Branch message dialog returned no result.");
+        }
+
+        updateInfoTextAreas();
+    }
+
+    private void statusOutputChangeListener(ObservableValue<? extends String> observable, String oldValue, String newValue)
     {
         if (newValue == null)
         {
@@ -182,6 +251,20 @@ public class RepositoryController
         {
             // catch errors so change listener does not collapse
             logger.error("An error occurred while listening to command out.");
+            logger.debug(e);
+        }
+    }
+
+    private void thenWait(long delay)
+    {
+        try
+        {
+            // brief suspend while information about the branches are gathered
+            Thread.sleep(200);
+        }
+        catch (Exception e)
+        {
+            logger.error("Could not sleep.");
             logger.debug(e);
         }
     }

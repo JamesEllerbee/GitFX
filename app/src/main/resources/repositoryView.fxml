@@ -4,100 +4,105 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jamesellerbee.gitfx.Controllers.RepositoryController">
+<VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.jamesellerbee.gitfx.Controllers.RepositoryController">
 
     <MenuBar>
         <Menu text="File">
-            <MenuItem text="Close repository" />
-            <MenuItem onAction="#onAction_Quit" text="Quit" />
+            <MenuItem text="Close repository" onAction="#onAction_Close"/>
+            <MenuItem onAction="#onAction_Quit" text="Quit"/>
         </Menu>
 
         <Menu text="Local">
-            <MenuItem onAction="#onAction_Status" text="Status" />
-            <MenuItem onAction="#onAction_Commit" text="Commit" />
+            <MenuItem onAction="#onAction_Status" text="Status"/>
+            <MenuItem onAction="#onAction_Commit" text="Commit"/>
+
+            <Menu text="Checkout">
+                <MenuItem text="New branch" onAction="#onAction_NewBranch"/>
+                <MenuItem text="Existing branch" onAction="#onAction_ExistingBranch"/>
+            </Menu>
         </Menu>
 
         <Menu text="Remote">
-            <MenuItem onAction="#onAction_Fetch" text="Fetch all" />
-            <MenuItem text="Pull" />
-            <MenuItem onAction="#onAction_Push" text="Push" />
+            <MenuItem onAction="#onAction_Fetch" text="Fetch all"/>
+            <MenuItem text="Pull"/>
+            <MenuItem onAction="#onAction_Push" text="Push"/>
         </Menu>
 
         <Menu text="Application">
-            <MenuItem onAction="#onAction_DebugCommandOutput" text="Debug command output" />
+            <MenuItem onAction="#onAction_DebugCommandOutput" text="Debug command output"/>
         </Menu>
     </MenuBar>
 
     <GridPane alignment="CENTER">
 
         <columnConstraints>
-            <ColumnConstraints maxWidth="112.0" minWidth="112.0" prefWidth="112.0" />
-            <ColumnConstraints maxWidth="472.0" minWidth="427.0" prefWidth="427.0" />
+            <ColumnConstraints maxWidth="112.0" minWidth="112.0" prefWidth="112.0"/>
+            <ColumnConstraints maxWidth="472.0" minWidth="427.0" prefWidth="427.0"/>
         </columnConstraints>
         <rowConstraints>
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints minHeight="30" />
-            <RowConstraints />
+            <RowConstraints/>
+            <RowConstraints/>
+            <RowConstraints minHeight="30"/>
+            <RowConstraints/>
         </rowConstraints>
 
         <VBox GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.rowSpan="2147483647">
-            <!-- add basic git command buttons here-->
+            <!-- basic git command buttons -->
             <Button onAction="#onAction_Status" styleClass="btn-primary" text="Refresh">
                 <tooltip>
-                    <Tooltip text="Perform a git status to update changes" />
+                    <Tooltip text="Perform a git status to update changes"/>
                 </tooltip>
 
                 <VBox.margin>
-                    <Insets bottom="10.0" />
+                    <Insets bottom="10.0"/>
                 </VBox.margin>
 
             </Button>
 
             <Button onAction="#onAction_Stage" styleClass="btn-primary" text="Stage changes">
-
                 <tooltip>
-                    <Tooltip text="Stage unstaged changes WARNING: Currently, this will add all changes." />
+                    <Tooltip text="Stage unstaged changes WARNING: Currently, this will add all changes."/>
                 </tooltip>
 
                 <VBox.margin>
-                    <Insets bottom="10.0" />
+                    <Insets bottom="10.0"/>
                 </VBox.margin>
             </Button>
 
             <Button onAction="#onAction_Commit" styleClass="btn-primary" text="Commit">
                 <tooltip>
-                    <Tooltip text="Open commit message dialog and create a commit for the staged changes" />
+                    <Tooltip text="Open commit message dialog and create a commit for the staged changes"/>
                 </tooltip>
 
                 <VBox.margin>
-                    <Insets bottom="10.0" />
+                    <Insets bottom="10.0"/>
                 </VBox.margin>
 
             </Button>
 
 
-
             <Button onAction="#onAction_Push" styleClass="btn-primary" text="Push">
                 <tooltip>
-                    <Tooltip text="Push committed changes to remote WARNING: this will push everything, not just committed changes on this local branch." />
+                    <Tooltip
+                            text="Push committed changes to remote WARNING: this will push everything, not just committed changes on this local branch."/>
                 </tooltip>
             </Button>
         </VBox>
 
-        <Label text="Unstaged Changes" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <Label text="Unstaged Changes" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
-        <TextArea fx:id="unstagedChangesTextArea" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <TextArea fx:id="unstagedChangesTextArea" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
-        <Label text="Staged changes" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <Label text="Staged changes" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
-        <TextArea fx:id="stagedChangesTextArea" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        <TextArea fx:id="stagedChangesTextArea" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
         <VBox.margin>
-            <Insets top="10.0" />
+            <Insets top="10.0"/>
         </VBox.margin>
         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" />
+            <Insets bottom="10.0" left="10.0" right="10.0"/>
         </padding>
 
     </GridPane>

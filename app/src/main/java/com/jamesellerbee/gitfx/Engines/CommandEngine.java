@@ -72,7 +72,8 @@ public class CommandEngine implements ICommandEngine
                                                     logger.error(e);
                                                 }
                                                 logger.debug("line reader thread finishing.");
-                                            });
+                                            },
+                                            "Process Manager Thread");
         lineReaderTread.start();
     }
 

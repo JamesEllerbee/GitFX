@@ -179,6 +179,8 @@ public class GitFxController
                                             gitFxStage.show();
                                         });
 
+            repositoryController.setStage(repositoryStage);
+
             gitFxStage.hide();
         }
         catch (Exception e)
