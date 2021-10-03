@@ -11,9 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +56,8 @@ public class RepositoryController
 
     // endregion
 
+    // region Public Methods
+
     public void setStage(Stage stage)
     {
         repositoryStage = stage;
@@ -70,10 +70,10 @@ public class RepositoryController
         {
             try
             {
-                if(!newValue.contains("git rev-parse --abbrev-ref HEAD") &&
-                   !newValue.contains("git checkout") &&
-                   !newValue.contains(BRANCH_AHEAD) &&
-                   !newValue.contains(GIT_PUSH_HINT))
+                if (!newValue.contains("git rev-parse --abbrev-ref HEAD") &&
+                    !newValue.contains("git checkout") &&
+                    !newValue.contains(BRANCH_AHEAD) &&
+                    !newValue.contains(GIT_PUSH_HINT))
                 {
                     stringBuilder.append(newValue);
                 }
@@ -115,11 +115,11 @@ public class RepositoryController
 
     public void onAction_Commit(ActionEvent actionEvent)
     {
-        // FUTURE: check application properties if user wants to open their text editor
-        TextInputDialog commitMessageDialog = new TextInputDialog("Enter commit message.");
+        // todo FUTURE: check application properties if user wants to open their text editor
+        var commitMessageDialog = new TextInputDialog("Enter commit message.");
         commitMessageDialog.setHeaderText("Enter commit message");
 
-        Optional<String> resultOptional = commitMessageDialog.showAndWait();
+        var resultOptional = commitMessageDialog.showAndWait();
         logger.debug("commit message dialog result: {}", resultOptional);
         if (resultOptional.isPresent())
         {
@@ -147,7 +147,7 @@ public class RepositoryController
 
     public void onAction_Push(ActionEvent actionEvent)
     {
-        //todo make this safer by resolving current root and adding origin
+        //todo: make this safer by resolving current branch and adding origin
         commandEngine.send("git push");
         updateInfoTextAreas();
     }
@@ -190,6 +190,41 @@ public class RepositoryController
         updateInfoTextAreas();
     }
 
+    public void onAction_StashList(ActionEvent actionEvent)
+    {
+        commandEngine.send("git stash list");
+    }
+
+    public void onAction_StashPush(ActionEvent actionEvent)
+    {
+        var stashMessageDialog = new TextInputDialog("Enter stash message.");
+        stashMessageDialog.setHeaderText("Enter stash message");
+
+        var stashCommandStringBuilder = new StringBuilder("git stash push");
+
+        var resultOptional = stashMessageDialog.showAndWait();
+        if (resultOptional.isPresent())
+        {
+            stashCommandStringBuilder.append(" -m ");
+            stashCommandStringBuilder.append("\"");
+            stashCommandStringBuilder.append(resultOptional.get());
+            stashCommandStringBuilder.append("\"");
+        }
+
+        commandEngine.send(stashCommandStringBuilder.toString());
+        updateInfoTextAreas();
+    }
+
+    public void onAction_StashPop(ActionEvent actionEvent)
+    {
+        commandEngine.send("git stash pop");
+    }
+
+    public void onAction_Menu(ActionEvent actionEvent)
+    {
+        // todo: open settings window
+    }
+
     public void onAction_Close(ActionEvent actionEvent)
     {
         repositoryStage.close();
@@ -197,62 +232,90 @@ public class RepositoryController
 
     public void onAction_NewBranch(ActionEvent actionEvent)
     {
-        TextInputDialog branchMessageDialog = new TextInputDialog("Enter new branch name.");
-        branchMessageDialog.setTitle("Checkout to new branch");
-        branchMessageDialog.setHeaderText("Enter new branch name");
+        // todo: check that the user doesn't have any uncommitted changes before checking out, warn and ask if they want to continue
+        if (!hasUnstagedChanges())
+        {
+            var branchMessageDialog = new TextInputDialog("Enter new branch name.");
+            branchMessageDialog.setTitle("Checkout to new branch");
+            branchMessageDialog.setHeaderText("Enter new branch name");
 
-        Optional<String> resultOptional = branchMessageDialog.showAndWait();
-        if (resultOptional.isPresent())
-        {
-            // todo: check that the user doesn't have any uncommitted changes before checking out, warn and ask if they want to continue
-            commandEngine.send(String.format("git checkout -b %s", resultOptional.get()));
-            setCurrentBranchInfo();
-        }
-        else
-        {
-            logger.debug("Branch message dialog returned no result.");
+            var resultOptional = branchMessageDialog.showAndWait();
+            if (resultOptional.isPresent())
+            {
+                commandEngine.send(String.format("git checkout -b %s", resultOptional.get()));
+                setCurrentBranchInfo();
+            }
+            else
+            {
+                logger.debug("Branch message dialog returned no result.");
+            }
         }
     }
 
     public void onAction_ExistingBranch(ActionEvent actionEvent)
     {
-        // todo: open a window that shows all the branches and checkout to the branch the user selects
-        TextInputDialog branchMessageDialog = new TextInputDialog("Enter branch name.");
-        branchMessageDialog.setTitle("Checkout to existing branch");
-
-        StringBuilder stringBuilder = new StringBuilder();
-        ChangeListener<String> branchOutputChangeListener = ((observable, oldValue, newValue) ->
+        if(!hasUnstagedChanges())
         {
-            if (!newValue.contains("git branch -a"))
+            // todo: open a window that shows all the branches and checkout to the branch the user selects instead of having them type it in.s
+            var branchMessageDialog = new TextInputDialog("Enter branch name.");
+            branchMessageDialog.setTitle("Checkout to existing branch");
+
+            var stringBuilder = new StringBuilder();
+            ChangeListener<String> branchOutputChangeListener = ((observable, oldValue, newValue) ->
             {
-                stringBuilder.append(newValue);
-                stringBuilder.append("\n");
-                logger.trace("new value: {}, string builder value {}", newValue, stringBuilder.toString());
+                if (!newValue.contains("git branch -a"))
+                {
+                    stringBuilder.append(newValue);
+                    stringBuilder.append("\n");
+                    logger.trace("new value: {}, string builder value {}", newValue, stringBuilder.toString());
+                }
+            });
+
+            commandEngine.getCommandOutputProperty().addListener(branchOutputChangeListener);
+            commandEngine.send("git branch -a");
+
+            thenWait(100);
+
+            branchMessageDialog.setHeaderText(stringBuilder.toString());
+
+            Optional<String> resultOptional = branchMessageDialog.showAndWait();
+            commandEngine.getCommandOutputProperty().removeListener(branchOutputChangeListener);
+            if (resultOptional.isPresent())
+            {
+                // todo: check that the user doesn't have any uncommitted changes before checking out, warn and ask if they want to continue
+                commandEngine.send(String.format("git checkout %s", resultOptional.get()));
+                setCurrentBranchInfo();
             }
-        });
+            else
+            {
+                logger.debug("Branch message dialog returned no result.");
+            }
 
-        commandEngine.getCommandOutputProperty().addListener(branchOutputChangeListener);
-        commandEngine.send("git branch -a");
+            updateInfoTextAreas();
+        }
+    }
 
-        thenWait(100);
+    // endregion
 
-        branchMessageDialog.setHeaderText(stringBuilder.toString());
+    // region Private Methods
 
-
-        Optional<String> resultOptional = branchMessageDialog.showAndWait();
-        commandEngine.getCommandOutputProperty().removeListener(branchOutputChangeListener);
-        if (resultOptional.isPresent())
+    private boolean hasUnstagedChanges()
+    {
+        var result = true;
+        if (unstagedChangesTextArea.getText().isBlank())
         {
-            // todo: check that the user doesn't have any uncommitted changes before checking out, warn and ask if they want to continue
-            commandEngine.send(String.format("git checkout %s", resultOptional.get()));
-            setCurrentBranchInfo();
+            result = false;
         }
         else
         {
-            logger.debug("Branch message dialog returned no result.");
+            logger.warn("Unstaged changes text area is not blank");
+            var alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Warning");
+            alert.setHeaderText("Cannot checkout to branch, there are unstaged changes. Stage or stash your changes and refresh before attempting to checkout to a new branch.");
+            alert.show();
         }
 
-        updateInfoTextAreas();
+        return result;
     }
 
     private void statusOutputChangeListener(ObservableValue<? extends String> observable, String oldValue, String newValue)
@@ -268,14 +331,14 @@ public class RepositoryController
                 !newValue.contains(NOT_STAGED_HINT_RESTORE) &&
                 !newValue.contains(NO_CHANGED_ADDED))
             {
-                unstagedChangesTextArea.appendText(String.format("%s\n", newValue));
+                unstagedChangesTextArea.appendText(String.format("%s\n", newValue.replace("\t", "")));
             }
 
             if (appendToStagedChangesTextArea &&
                 !newValue.contains(STAGED_HINT_RESTORE_STAGED) &&
                 !newValue.contains(NOT_STAGED))
             {
-                stagedChangesTextArea.appendText(String.format("%s\n", newValue));
+                stagedChangesTextArea.appendText(String.format("%s\n", newValue.replace("\t", "")));
             }
 
             if (newValue.contains(NOT_STAGED))
@@ -311,4 +374,6 @@ public class RepositoryController
             logger.debug(e);
         }
     }
+
+    // endregion
 }

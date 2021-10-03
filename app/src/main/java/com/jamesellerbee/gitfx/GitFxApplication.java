@@ -30,7 +30,7 @@ public class GitFxApplication extends javafx.application.Application
         FXMLLoader fxmlLoader = new FXMLLoader(GitFxApplication.class.getResource("/applicationView.fxml"));
         Parent root = fxmlLoader.load();
 
-        // FUTURE: remember screen size on stop and load
+        // todo FUTURE: remember screen size on stop and load
         Scene scene = new Scene(root, 500, 500);
 
         GitFxController gitFxController = fxmlLoader.getController();

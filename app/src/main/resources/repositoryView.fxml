@@ -10,11 +10,17 @@
     <MenuBar>
         <Menu text="File">
             <MenuItem text="Close repository" onAction="#onAction_Close"/>
+            <MenuItem text="Settings" onAction="#onAction_Menu"/>
             <MenuItem onAction="#onAction_Quit" text="Quit"/>
         </Menu>
 
         <Menu text="Local">
             <MenuItem onAction="#onAction_Status" text="Status"/>
+            <Menu text="Stash">
+                <MenuItem onAction="#onAction_StashList" text="List"/>
+                <MenuItem onAction="#onAction_StashPush" text="Push"/>
+                <MenuItem onAction="#onAction_StashPop" text="Pop"/>
+            </Menu>
             <MenuItem onAction="#onAction_Commit" text="Commit"/>
 
             <Menu text="Checkout">
@@ -112,7 +118,7 @@
 
         <Label GridPane.columnIndex="1" GridPane.rowIndex="2" text="Unstaged Changes">
             <GridPane.margin>
-                <Insets top="5" />
+                <Insets top="5"/>
             </GridPane.margin>
         </Label>
 
@@ -120,7 +126,7 @@
 
         <Label GridPane.columnIndex="1" GridPane.rowIndex="4" text="Staged changes">
             <GridPane.margin>
-                <Insets top="5" />
+                <Insets top="5"/>
             </GridPane.margin>
         </Label>
 
